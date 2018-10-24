@@ -11,10 +11,19 @@ import com.yangbingdong.serializer.pojo.EnumTypeObj;
 import com.yangbingdong.serializer.pojo.InnerMessageObj;
 import com.yangbingdong.serializer.pojo.MessageObj;
 import com.yangbingdong.serializer.pojo.Person;
+import com.yangbingdong.serializer.util.SerializeWrapper;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import static com.yangbingdong.serializer.util.SerializeWrapper.classHolder;
+import static com.yangbingdong.serializer.util.SerializeWrapperType.LIST_STRING;
+import static com.yangbingdong.serializer.util.SerializeWrapperType.getListTypeClass;
 
 /**
  * @author ybd
@@ -116,8 +125,73 @@ public class SerializeTest {
 		System.out.println(dePerson);
 	}
 
+	@Test
+	public void wrapperTest() {
+		List<Person> personList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			personList.add(getPerson());
+		}
+		Serializer serializer = new ProtostuffSerializer();
+		SerializeWrapper<List<Person>> listWrapper = SerializeWrapper.of(personList);
+		byte[] bytes = serializer.serialize(listWrapper);
+		System.out.println(bytes.length);
+
+		SerializeWrapper<List<Person>> deserialize = serializer.deserialize(bytes, getListTypeClass(Person.class));
+		List<Person> list = deserialize.getData();
+		System.out.println(list.get(0));
+	}
+
+	@Test
+	public void wrapperTest1() {
+		Person person = getPerson();
+		Serializer serializer = new ProtostuffSerializer();
+		SerializeWrapper<Person> personWrapper = SerializeWrapper.of(person);
+		byte[] bytes = serializer.serialize(personWrapper);
+		System.out.println(bytes.length);
+
+		SerializeWrapper<Person> deserialize = serializer.deserialize(bytes, classHolder());
+		Person list = deserialize.getData();
+		System.out.println(list);
+	}
+
+	@Test
+	public void wrapperTest2() {
+		List<Person> personList = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			personList.add(getPerson());
+		}
+		Map<String, List<Person>> map = new HashMap<>();
+		map.put("list", personList);
+		Serializer serializer = new ProtostuffSerializer();
+		SerializeWrapper<Map<String, List<Person>>> personWrapper = SerializeWrapper.of(map);
+		byte[] bytes = serializer.serialize(personWrapper);
+		System.out.println(bytes.length);
+
+		SerializeWrapper<Map<String, List<Person>>> deserialize = serializer.deserialize(bytes, classHolder());
+		Map<String, List<Person>> map1 = deserialize.getData();
+		System.out.println(map1);
+	}
+
+	@Test
+	public void wrapperTest3() {
+		List<String> stringList = new ArrayList<>();
+		for (int i = 0; i < 100; i++) {
+			stringList.add(Integer.toString(i));
+		}
+		Serializer serializer = new ProtostuffSerializer();
+		SerializeWrapper<List<String>> personWrapper = SerializeWrapper.of(stringList);
+		byte[] bytes = serializer.serialize(personWrapper);
+		System.out.println(bytes.length);
+
+		SerializeWrapper<List<String>> deserialize = serializer.deserialize(bytes, LIST_STRING);
+		List<String> data = deserialize.getData();
+		System.out.println(data);
+	}
+
 	private Person getPerson() {
-		return new Person(21, "ben");
+		Person ben = new Person(21, "ben");
+		ben.setSs(IntStream.range(0, 100).mapToObj(String::valueOf).collect(Collectors.toList()));
+		return ben;
 	}
 
 	private MessageObj getPojoBean() {

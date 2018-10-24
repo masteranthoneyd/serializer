@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author ybd
@@ -24,18 +25,12 @@ public class RedisOpUtil {
 	private RedisTemplate<String, Serializable> redisTemplate;
 
 	@SuppressWarnings("ConstantConditions")
-	public boolean set(final String key, final Serializable value, final long seconds) {
+	public boolean set(final String key, final Serializable value) {
 		return redisTemplate.execute((RedisCallback<Boolean>) connection -> {
 			RedisSerializer<String> serializer = getRedisSerializer();
 			byte[] byteKey = serializer.serialize(key);
-//			byte[] byteValue = CommonUtil.transObj2ByteArray(value);
 			byte[] byteValue = thirdSerializer.serialize(value);
-			if (seconds > 0) {
-				connection.setEx(byteKey, seconds, byteValue);
-			} else {
-				connection.set(byteKey, byteValue);
-			}
-			return true;
+			return connection.set(byteKey, byteValue);
 		});
 	}
 
@@ -47,12 +42,20 @@ public class RedisOpUtil {
 			if (value == null) {
 				return null;
 			}
-//			return transByteArray2Obj(value, clazz);
 			return thirdSerializer.deserialize(value, clazz);
 		});
 	}
 
-	private RedisSerializer<String> getRedisSerializer() {
+	public void hset(final String key, final Map<byte[], byte[]> value) {
+		redisTemplate.execute((RedisCallback<Boolean>) connection -> {
+			RedisSerializer<String> serializer = getRedisSerializer();
+			byte[] byteKey = serializer.serialize(key);
+			connection.hMSet(byteKey, value);
+			return true;
+		});
+	}
+
+	public RedisSerializer<String> getRedisSerializer() {
 		return redisTemplate.getStringSerializer();
 	}
 }

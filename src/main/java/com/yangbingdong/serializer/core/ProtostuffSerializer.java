@@ -2,14 +2,11 @@ package com.yangbingdong.serializer.core;
 
 import com.dyuproject.protostuff.LinkedBuffer;
 import com.dyuproject.protostuff.ProtostuffIOUtil;
-import com.dyuproject.protostuff.Schema;
-import com.dyuproject.protostuff.runtime.RuntimeSchema;
 import com.yangbingdong.serializer.Serializer;
 import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import static com.dyuproject.protostuff.runtime.RuntimeSchema.getSchema;
 
 /**
  * @author ybd
@@ -17,18 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @contact yangbingdong1994@gmail.com
  */
 public class ProtostuffSerializer implements Serializer {
-	private static Map<Class<?>, Schema<?>> cachedSchema = new ConcurrentHashMap<>();
 	private static Objenesis objenesis = new ObjenesisStd(true);
 
-	@SuppressWarnings("unchecked")
-	private static <T> Schema<T> getSchema(Class<T> cls) {
-		Schema<T> schema = (Schema<T>) cachedSchema.get(cls);
-		if (schema == null) {
-			schema = RuntimeSchema.createFrom(cls);
-			cachedSchema.put(cls, schema);
-		}
-		return schema;
-	}
 
 	@Override
 	@SuppressWarnings("unchecked")

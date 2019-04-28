@@ -1,6 +1,6 @@
 # 序列化性能测试
 
-![](http://ojoba1c98.bkt.clouddn.com/img/spring-boot-redis/serialize-performance.png)
+![](https://cdn.yangbingdong.com/img/spring-boot-redis/serialize-performance.png)
 
 
 
